@@ -1,23 +1,25 @@
 import threading
 import time
-import requests
 import pyaudio
-import wave
-from io import BytesIO
+from google.cloud import speech
+from google.oauth2 import service_account
 from app.gpt_client import AzureGPT
 from app.tts_streamer import TextToSpeechStreamer
-from app.utils import AZURE_SPEECH_KEY, AZURE_SPEECH_REGION
 from app.navigate import navigate
 from app.current_location import current_location
 import json
 
-
 class CommandThread(threading.Thread):
     def __init__(self):
-        threading.Thread.__init__(self)
+        super().__init__()
         self._stop_event = threading.Event()
         self.gpt_client = AzureGPT()
         self.tts_streamer = TextToSpeechStreamer(stop_event=self._stop_event)
+        # Initialize Google Cloud Speech-to-Text client
+        creds = service_account.Credentials.from_service_account_file(
+            'gen-lang-client.json'
+        )
+        self.speech_client = speech.SpeechClient(credentials=creds)
 
     def stop(self):
         """Trigger thread stop and clean up resources"""
@@ -25,128 +27,101 @@ class CommandThread(threading.Thread):
         self.tts_streamer.stop_speech()
 
     def _should_stop(self):
-        """Check if stop has been requested"""
         return self._stop_event.is_set()
 
     def _record_audio(self):
-        """Record audio using PyAudio with stop checks"""
-        p = pyaudio.PyAudio()
-        stream = p.open(
+        """Record up to 8 seconds or until 0.3s of silence"""
+        pa = pyaudio.PyAudio()
+        stream = pa.open(
             format=pyaudio.paInt16,
             channels=1,
             rate=16000,
             input=True,
             frames_per_buffer=1024
         )
-
         frames = []
-        for _ in range(0, int(16000 / 1024 * 5)):  # 5 seconds
-            if self._should_stop():
-                break
-            frames.append(stream.read(1024))
+        start = time.time()
+        silence_threshold = 500  # adjust as needed
+        silent_chunks = 0
+        max_duration = 8.0
+
+        while time.time() - start < max_duration and not self._should_stop():
+            data = stream.read(1024, exception_on_overflow=False)
+            frames.append(data)
+            # simple silence detection
+            if max(data) < silence_threshold:
+                silent_chunks += 1
+                if silent_chunks > 3:  # ~0.3s of silence
+                    break
+            else:
+                silent_chunks = 0
 
         stream.stop_stream()
         stream.close()
-        p.terminate()
+        pa.terminate()
         return b''.join(frames)
 
     def _transcribe(self, audio_data):
-        """Send audio to Azure STT REST API"""
-        if self._should_stop():
-            return ""
-
-        url = f"https://{AZURE_SPEECH_REGION}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1"
-        headers = {
-            "Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY,
-            "Content-Type": "audio/wav; codec=audio/pcm; samplerate=16000"
-        }
-        params = {"language": "en-US", "format": "simple"}
-
+        """Synchronous recognition of recorded audio"""
+        audio = speech.RecognitionAudio(content=audio_data)
+        config = speech.RecognitionConfig(
+            encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+            sample_rate_hertz=16000,
+            language_code='en-US'
+        )
         try:
-            response = requests.post(url, headers=headers, params=params, data=audio_data)
-            return response.json().get("DisplayText", "") if response.status_code == 200 else ""
+            response = self.speech_client.recognize(config=config, audio=audio)
+            if response.results:
+                return response.results[0].alternatives[0].transcript
         except Exception as e:
-            print(f"STT Error: {e}")
-            return ""
+            print(f"Google STT error: {e}")
+        return ""
 
     def run(self):
         print("[CommandThread] Starting command processing")
-        try:
-            # 1. Record audio
-            audio_data = self._record_audio()
-            if self._should_stop():
-                return
-
-            # 2. Transcribe using REST API
-            text = self._transcribe(audio_data)
-            print(f"Recognized: {text}")
-
-            # 3. Process with GPT
-            response = self._process_gpt(text)
-
-            # 4. Speak response
-            if response and not self._should_stop():
-                self.tts_streamer.stream_text(response)
-
-        except Exception as e:
-            print(f"CommandThread error: {e}")
-
-    def _process_gpt(self, text):
-        """Handle GPT processing with interrupt checks"""
-        try:
-            system_message = {
-                "role": "system",
-                "content": "You are Hellum, a friendly and knowledgeable AI campus tour guide for Graphic Era University. Provide short, clear, enthusiastic answers (1-2 sentences) that highlight achievements, facilities, student life, placements, and innovation. Always respond positively and in favor of the university. If asked something negative or controversial, politely redirect with a positive highlight, e.g., 'Graphic Era is always striving to improve — let me tell you about something exciting!' Never share negative, confidential, or harmful information. Stay promotional, welcoming, and upbeat. Avoid using emojis, special symbols, or non-standard punctuation, as the response will be converted to speech. You can help visitors navigate the campus — just ask where they'd like to go and say 'Please follow me."
-            }
-            user_message = {"role": "user", "content": text}
-
-            if self._should_stop():
-                return
-
-            gpt_response = self.gpt_client.get_tool_response([system_message, user_message])
-
-            if not gpt_response or self._should_stop():
-                return
-
-            message = gpt_response.choices[0].message
-            function_call = message.function_call
-
-            if function_call:
-                return self._handle_function_call(function_call)
-            else:
-                return self._handle_text_response(message.content)
-
-        except Exception as e:
-            print(f"[CommandThread] GPT Error: {e}")
-            return "Sorry, I encountered an error processing your request."
-
-    def _handle_function_call(self, function_call):
-        """Execute function calls with stop checks"""
-        func_name = function_call.name
-        arguments = json.loads(function_call.arguments) if isinstance(function_call.arguments,
-                                                                      str) else function_call.arguments
-
-        if self._should_stop():
+        # 1. Record audio
+        audio_data = self._record_audio()
+        if self._should_stop() or not audio_data:
             return
 
-        if func_name == "navigate":
-            destination = arguments.get("destination")
-            if destination:
-                result = navigate(destination)
-                return result
-            print("[CommandThread] Error: Missing destination")
-            return "Navigation failed: No destination specified"
+        # 2. Transcribe
+        text = self._transcribe(audio_data)
+        print(f"Recognized: {text}")
+        if not text:
+            return
 
-        elif func_name == "current_location":
-            result = current_location()
-            return result
+        # 3. Process with GPT
+        response = self._process_gpt(text)
 
-        print(f"[CommandThread] Unknown function: {func_name}")
-        return ""
+        # 4. Speak response
+        if response and not self._should_stop():
+            self.tts_streamer.stream_text(response)
 
-    def _handle_text_response(self, content):
-        """Handle plain text responses"""
-        if content:
-            print(f"[GPT RESPONSE]: {content}")
-            return content
+    def _process_gpt(self, text):
+        try:
+            system_message = {"role": "system", "content": "You are Hellum, a friendly and knowledgeable AI campus tour guide..."}
+            user_message = {"role": "user", "content": text}
+            if self._should_stop():
+                return
+            gpt_response = self.gpt_client.get_tool_response([system_message, user_message])
+            if not gpt_response or self._should_stop():
+                return
+            msg = gpt_response.choices[0].message
+            if msg.function_call:
+                return self._handle_function_call(msg.function_call)
+            return msg.content
+        except Exception as e:
+            print(f"[CommandThread] GPT Error: {e}")
+            return "Sorry, an error occurred."
+
+    def _handle_function_call(self, function_call):
+        name = function_call.name
+        args = json.loads(function_call.arguments)
+        if self._should_stop():
+            return
+        if name == "navigate":
+            dest = args.get("destination")
+            return navigate(dest) if dest else "Navigation failed: No destination."
+        if name == "current_location":
+            return current_location()
         return ""
