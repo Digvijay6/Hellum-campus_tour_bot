@@ -1,0 +1,230 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CSIT Right Side of the building",
+       "description":"The Department of Computer Science and Information Technology (CSIT) at Graphic Era University (GEU) is one of the leading departments, offering cutting-edge academic programs designed to equip students with the knowledge and skills needed to excel in the rapidly evolving tech industry. The department provides undergraduate and postgraduate programs that focus on software engineering, computer networks, data science, artificial intelligence, and cybersecurity, among other key areas.\n\nGEU's CSIT Department is committed to fostering a rigorous academic environment where students are encouraged to innovate, solve real-world problems, and develop strong technical foundations. The department is equipped with state-of-the-art labs and advanced technology, including high-performance computing clusters, networking labs, and AI-enabled systems.\n\nFaculty members are highly qualified and have strong academic and industrial experience, ensuring that students receive a comprehensive education that bridges theory and practice. The department has strong industry links that help students secure internships and high placements in top tech companies globally.\n\nStudents are expected to maintain high standards of academic performance, as the curriculum is challenging and requires dedication, hard work, and innovation. Graphic Era's CSIT program prepares students to lead in the competitive field of technology and empowers them with the tools to shape the future.\n"
+      },
+      
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              77.99301596481246,
+              30.26926905394356
+            ],
+            [
+              77.99294603690652,
+              30.26920865956788
+            ],
+            [
+              77.99342281808129,
+              30.26885727337418
+            ],
+            [
+              77.99347049619917,
+              30.26889570630027
+            ],
+            [
+              77.99301596481246,
+              30.26926905394356
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 0
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CSIT left side of the building",
+        "description":"The Department of Computer Science and Information Technology (CSIT) at Graphic Era University (GEU) is one of the leading departments, offering cutting-edge academic programs designed to equip students with the knowledge and skills needed to excel in the rapidly evolving tech industry. The department provides undergraduate and postgraduate programs that focus on software engineering, computer networks, data science, artificial intelligence, and cybersecurity, among other key areas.\n\nGEU's CSIT Department is committed to fostering a rigorous academic environment where students are encouraged to innovate, solve real-world problems, and develop strong technical foundations. The department is equipped with state-of-the-art labs and advanced technology, including high-performance computing clusters, networking labs, and AI-enabled systems.\n\nFaculty members are highly qualified and have strong academic and industrial experience, ensuring that students receive a comprehensive education that bridges theory and practice. The department has strong industry links that help students secure internships and high placements in top tech companies globally.\n\nStudents are expected to maintain high standards of academic performance, as the curriculum is challenging and requires dedication, hard work, and innovation. Graphic Era's CSIT program prepares students to lead in the competitive field of technology and empowers them with the tools to shape the future.\n"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              77.99270764631848,
+              30.26897531731406
+            ],
+            [
+              77.9931685347886,
+              30.268601968553696
+            ],
+            [
+              77.99321621290517,
+              30.26865138244122
+            ],
+            [
+              77.9927521458959,
+              30.269019240603967
+            ],
+            [
+              77.99270764631848,
+              30.26897531731406
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 1
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CSIT front entrance",
+        "description":"This is the entrance to the Department of Computer Science and Information Technology at Graphic Era University. Here, students are trained in cutting-edge technologies, programming, and real-world problem solving — preparing them for careers in software development, data science, cybersecurity, and beyond."
+
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              77.99338149704681,
+              30.268618439852474
+            ],
+            [
+              77.99348321036337,
+              30.268703541518803
+            ],
+            [
+              77.99344506786935,
+              30.268720012800543
+            ],
+            [
+              77.99335289017534,
+              30.26865138244122
+            ],
+            [
+              77.99338149704681,
+              30.268618439852474
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 2
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CSIT side entrance",
+        "description":"You are now near a secondary entrance to the CSIT block. This entry provides direct access to some classrooms and lab facilities on the east wing of the building."
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              77.99347685328127,
+              30.268881980256808
+            ],
+            [
+              77.9934514249515,
+              30.26885727337418
+            ],
+            [
+              77.99349910306933,
+              30.268807859589728
+            ],
+            [
+              77.9935277099396,
+              30.268824330853974
+            ],
+            [
+              77.99347685328127,
+              30.268881980256808
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 3
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CSIT gate",
+        "description":"You’re now standing at the main gate of the CSIT department — the entry point to one of the most dynamic academic zones on campus. From here, students dive into programming, AI, data science, and everything tech. Step through, and you're entering a space built for innovation"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              77.99372160131855,
+              30.2683622826398
+            ],
+            [
+              77.99377881505899,
+              30.26830737815662
+            ],
+            [
+              77.99382649317681,
+              30.268348556521715
+            ],
+            [
+              77.99376610089473,
+              30.2684116966485
+            ],
+            [
+              77.99372160131855,
+              30.2683622826398
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 5
+    },
+  
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CSIT front lawn",
+        "description":""
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              77.9934225064315,
+              30.26851560255416
+            ],
+            [
+              77.99347077056586,
+              30.268441166073288
+            ],
+            [
+              77.99357419371063,
+              30.26844265480311
+            ],
+            [
+              77.99365520850836,
+              30.2684917828866
+            ],
+            [
+              77.9936689982606,
+              30.268561753143985
+            ],
+            [
+              77.99364658991357,
+              30.26861832480509
+            ],
+            [
+              77.99358281230684,
+              30.2686510768047
+            ],
+            [
+              77.9934225064315,
+              30.26851560255416
+            ]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "id": 6
+    }
+  ]
+}

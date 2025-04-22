@@ -4,3 +4,5 @@ pvrecorder
 pyaudio
 azure-cognitiveservices-speech
 openai
+shapely
+matplotlib
