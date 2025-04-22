@@ -1,12 +1,6 @@
-python-dotenv~=1.1.0
-pvporcupine~=3.0.5
-pvrecorder~=1.2.7
-pyaudio~=0.2.14
+python-dotenv
+pvporcupine
+pvrecorder
+pyaudio
+openai
 deepgram-sdk
-sounddevice
-aiohttp
-websockets
-requests
-pydub~=0.25.1
-simpleaudio~=1.0.4
-openai~=1.75.0

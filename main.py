@@ -79,7 +79,7 @@ class MainProcess:
             self.current_command_thread.join(timeout=0.5)
 
         # Start new command thread
-        self.current_command_thread = CommandThread(self._stop_event, self)
+        self.current_command_thread = CommandThread()
         self.current_command_thread.start()
 
     def cleanup(self):

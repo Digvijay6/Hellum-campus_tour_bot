@@ -1,84 +1,57 @@
 import threading
-import io
-import time
-import asyncio
-from pydub import AudioSegment
-import simpleaudio as sa
-from deepgram import DeepgramClient, DeepgramClientOptions, PrerecordedOptions
+import pyaudio
+from deepgram import DeepgramClient, DeepgramClientOptions, SpeakWSOptions, SpeakWebSocketEvents
 from app.utils import DEEPGRAM_API_KEY
 
-
 class TextToSpeechStreamer:
-    def __init__(self, stop_event):
-        self.stop_event = stop_event
-        self.play_obj = None
+    def __init__(self, stop_event=None):
+        self.stop_event = stop_event or threading.Event()
+        # Configure client to disable automatic playback
+        config = DeepgramClientOptions(options={"speaker_playback": "false"})
+        self.deepgram_client = DeepgramClient(DEEPGRAM_API_KEY, config)
+        self.voice = "aura"
+        self.p = pyaudio.PyAudio()
+        self.stream = None
 
     def stream_text(self, text):
-        """Stream TTS using Deepgram SDK"""
+        if self.stop_event.is_set():
+            return
+        dg_conn = self.deepgram_client.speak.websocket.v("1")
+        options = SpeakWSOptions(model="aura-asteria-en", encoding="linear16", sample_rate=24000)
 
-        def tts_worker():
-            try:
-                # Set up async event loop for the thread
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                loop.run_until_complete(self._stream_tts_async(text))
-            except Exception as e:
-                print(f"[TTSStreamer] Error in TTS streaming: {e}")
-
-        threading.Thread(target=tts_worker).start()
-
-    async def _stream_tts_async(self, text):
-        """Async method to handle TTS using Deepgram SDK"""
-        try:
-            # Configure Deepgram client
-            config = DeepgramClientOptions(options={"keepalive": "true"})
-            deepgram = DeepgramClient(DEEPGRAM_API_KEY, config)
-
-            # Set TTS parameters
-            options = {
-                "model": "aura-asteria-en",
-                "encoding": "linear16",
-                "sample_rate": 24000
-            }
-
-            # Get audio data as bytes
-            response = await deepgram.speak.v("1").stream_request(text, options)
-
+        def on_audio(data, **kwargs):
             if self.stop_event.is_set():
-                print("[TTSStreamer] Stopping before playback.")
+                dg_conn.finish()
                 return
+            if self.stream is None:
+                self.stream = self.p.open(format=self.p.get_format_from_width(2), channels=1, rate=24000, output=True)
+            try:
+                self.stream.write(data)
+            except Exception as e:
+                print(f"TTS playback error: {e}")
+                dg_conn.finish()
 
-            # Convert to audio and play
-            buffer = response
+        dg_conn.on(SpeakWebSocketEvents.AudioData, on_audio)
+        dg_conn.on(SpeakWebSocketEvents.Error, lambda err, **kw: print(f"TTS Error: {err}"))
 
-            if buffer:
-                audio = AudioSegment(
-                    data=buffer,
-                    sample_width=2,
-                    frame_rate=24000,
-                    channels=1
-                )
+        dg_conn.start(options)
+        dg_conn.send_text(text)
+        dg_conn.flush()
+        try:
+            dg_conn.wait_for_complete()
+        except Exception:
+            pass
+        dg_conn.finish()
 
-                if self.stop_event.is_set():
-                    print("[TTSStreamer] Stopping before playback.")
-                    return
-
-                self.play_obj = sa.play_buffer(
-                    audio.raw_data,
-                    num_channels=1,
-                    bytes_per_sample=2,
-                    sample_rate=24000
-                )
-
-                # Wait for playback completion unless interrupted
-                while self.play_obj.is_playing() and not self.stop_event.is_set():
-                    await asyncio.sleep(0.1)
-
-                if self.stop_event.is_set() and self.play_obj.is_playing():
-                    self.play_obj.stop()
-
-        except Exception as e:
-            print(f"[TTSStreamer] Error in TTS streaming: {e}")
+        # Clean up
+        self.stop_speech()
 
     def stop_speech(self):
-        pass
+        if self.stream:
+            try:
+                self.stream.stop_stream()
+                self.stream.close()
+            except Exception as e:
+                print(f"Error stopping TTS stream: {e}")
+            finally:
+                self.stream = None
