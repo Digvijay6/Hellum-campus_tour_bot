@@ -1,4 +1,4 @@
-from localizer import GeoPolygonAnalyzer, Point
+from app.localizer import GeoPolygonAnalyzer, Point
 
 map_path=r"./gjson.json"
 geopoly = GeoPolygonAnalyzer(map_path)
