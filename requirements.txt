@@ -9,3 +9,5 @@ matplotlib
 serial
 pyserial
 requests
+polyline
+asyncio
