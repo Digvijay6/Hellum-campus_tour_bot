@@ -4,3 +4,6 @@ pvrecorder
 pyaudio
 azure-cognitiveservices-speech
 openai
+serial
+pyserial
+requests

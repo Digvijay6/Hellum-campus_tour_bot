@@ -6,7 +6,7 @@ import wave
 from io import BytesIO
 from app.gpt_client import AzureGPT
 from app.tts_streamer import TextToSpeechStreamer
-from app.utils import AZURE_SPEECH_KEY, AZURE_SPEECH_REGION
+from app.utils import AZURE_SPEECH_KEY, AZURE_SPEECH_REGION, GPT_SYSTEM_PROMPT
 from app.navigate import navigate
 from app.current_location import current_location
 import json
@@ -96,7 +96,7 @@ class CommandThread(threading.Thread):
         try:
             system_message = {
                 "role": "system",
-                "content": "You are Hellum, a friendly and knowledgeable AI campus tour guide for Graphic Era University. Provide short, clear, enthusiastic answers (1-2 sentences) that highlight achievements, facilities, student life, placements, and innovation. Always respond positively and in favor of the university. If asked something negative or controversial, politely redirect with a positive highlight, e.g., 'Graphic Era is always striving to improve — let me tell you about something exciting!' Never share negative, confidential, or harmful information. Stay promotional, welcoming, and upbeat. Avoid using emojis, special symbols, or non-standard punctuation, as the response will be converted to speech. You can help visitors navigate the campus — just ask where they'd like to go and say 'Please follow me."
+                "content": GPT_SYSTEM_PROMPT
             }
             user_message = {"role": "user", "content": text}
 
