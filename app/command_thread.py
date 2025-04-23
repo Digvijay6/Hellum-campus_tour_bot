@@ -6,7 +6,7 @@ import wave
 from io import BytesIO
 from app.gpt_client import AzureGPT
 from app.tts_streamer import TextToSpeechStreamer
-from app.utils import AZURE_SPEECH_KEY, AZURE_SPEECH_REGION
+from app.utils import AZURE_SPEECH_KEY, AZURE_SPEECH_REGION, GPT_SYSTEM_PROMPT
 from app.navigate import navigate
 from app.current_location import current_location
 import json

@@ -28,6 +28,7 @@ class MainProcess:
             if not PV_ACCESS_KEY:
                 raise ValueError("Missing Porcupine access key")
 
+            # Use the provided util function to obtain the wake word asset path.
             wakeword_path = get_wakeword_path()
             self.porcupine = pvporcupine.create(
                 access_key=PV_ACCESS_KEY,
@@ -72,13 +73,13 @@ class MainProcess:
 
     def _handle_wakeword(self):
         """Handle wake word detection event"""
-        # Stop current command thread
+        # Stop current command thread if it is already running.
         if self.current_command_thread and self.current_command_thread.is_alive():
             print("Interrupting previous command")
             self.current_command_thread.stop()
             self.current_command_thread.join(timeout=0.5)
 
-        # Start new command thread
+        # Start the command thread (for processing voice commands, etc.).
         self.current_command_thread = CommandThread()
         self.current_command_thread.start()
 
