@@ -7,8 +7,6 @@ import pvporcupine
 from pvrecorder import PvRecorder
 import platform
 from dotenv import load_dotenv
-from app.send_command import send_command_to_arduino
-
 
 load_dotenv()
 
@@ -84,21 +82,6 @@ class MainProcess:
         # Start the command thread (for processing voice commands, etc.).
         self.current_command_thread = CommandThread()
         self.current_command_thread.start()
-
-        # Start a new thread to send LED commands.
-        led_thread = threading.Thread(target=self.send_led_command)
-        led_thread.start()
-
-    def send_led_command(self):
-        """Send LED_ON then after a delay send LED_OFF to the Arduino."""
-        try:
-            print("Sending LED_ON command to Arduino")
-            send_command_to_arduino("LED_ON")
-            time.sleep(2)
-            print("Sending LED_OFF command to Arduino")
-            send_command_to_arduino("LED_OFF")
-        except Exception as e:
-            print(f"Error sending LED command: {e}")
 
     def cleanup(self):
         """Clean up all resources"""
