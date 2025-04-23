@@ -1,8 +1,0 @@
-python-dotenv
-pvporcupine
-pvrecorder
-pyaudio
-azure-cognitiveservices-speech
-openai
-shapely
-matplotlib
