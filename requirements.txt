@@ -4,6 +4,8 @@ pvrecorder
 pyaudio
 azure-cognitiveservices-speech
 openai
+shapely
+matplotlib
 serial
 pyserial
 requests
