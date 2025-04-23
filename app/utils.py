@@ -24,7 +24,7 @@ def get_wakeword_path():
     """Choose wakeword .ppn file based on platform."""
     system = platform.system().lower()
     if system == "linux":
-        return "assets/hellum_en_pi.ppn"
+        return "assets/Hellum_en_pi.ppn"
     else:
         return "assets/hellum_win.ppn"
 
